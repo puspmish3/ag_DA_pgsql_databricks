@@ -3,7 +3,7 @@ name: Deploy to Google Cloud Run
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   PROJECT_ID: ai-da-pgsql-databricks # Replace with your GCP Project ID (letters, numbers, hyphens only)
