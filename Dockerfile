@@ -1,5 +1,5 @@
 # Stage 1: Build dependencies and client
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 # Install openssl for Prisma
 RUN apk add --no-cache libc6-compat openssl
@@ -22,12 +22,14 @@ COPY . .
 
 # Disable telemetry during build
 ENV NEXT_TELEMETRY_DISABLED=1
+# Placeholder env for build-time compilation
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 # Build the Next.js application
 RUN npm run build
 
 # Production image, copy all the files and run next
-FROM node:18-alpine AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
