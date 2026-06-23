@@ -1,0 +1,73 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ==========================================
+// 1. Transactional Models (OLTP)
+// ==========================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  insights  SavedInsight[]
+}
+
+model PipelineRun {
+  id          String   @id @default(uuid())
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+  status      String   // "running", "success", "failed"
+  recordsSynced Int    @default(0)
+  errorMessage String?
+  triggeredBy String   @default("system")
+}
+
+model SavedInsight {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  featureId   String   // e.g. "sales" or "telemetry"
+  queryConfig String   // JSON string representing filters/chart type
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// ==========================================
+// 2. Analytical Warehouse Models (OLAP)
+//    Used for Local Mode Emulation.
+//    In Cloud Mode, these map to Databricks.
+// ==========================================
+
+model SalesTransaction {
+  id              Int      @id @default(autoincrement())
+  transactionId   String   @unique
+  timestamp       DateTime
+  amount          Float
+  quantity        Int
+  productCategory String
+  productName     String
+  region          String   // "North America", "Europe", "Asia-Pacific", "Latin America"
+  customerAge     Int
+  paymentMethod   String   // "Credit Card", "PayPal", "Bank Transfer", "Apple Pay"
+}
+
+model TelemetryEvent {
+  id            Int      @id @default(autoincrement())
+  eventId       String   @unique
+  timestamp     DateTime
+  userId        String
+  eventType     String   // "page_view", "click", "add_to_cart", "checkout", "signup"
+  pagePath      String   // "/home", "/products", "/cart", "/checkout", "/profile"
+  durationMs    Int
+  deviceType    String   // "Desktop", "Mobile", "Tablet"
+  referrer      String   // "Google", "Direct", "Social Media", "Newsletter"
+}
